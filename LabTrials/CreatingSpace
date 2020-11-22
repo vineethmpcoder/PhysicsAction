@@ -1,0 +1,89 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 20 22:52:32 2020
+Bouncing ball
+@author: vmpsk
+"""
+
+import pygame 
+import numpy as np
+import random
+import math  
+
+pygame.init()
+
+screen = pygame.display.set_mode((600,600))
+
+#Title and icon
+pygame.display.set_caption("Hello world")
+icon = pygame.image.load('RedCircle.png')
+pygame.display.set_icon(icon)
+
+font = pygame.font.Font('freesansbold.ttf', 20)
+
+# Import image of the body in the game
+circleImage = pygame.image.load('RedCircle.png')
+circlePosition = np.array([100, 15]) # [x, y]
+circleVelocity = np.array([0, 0]) # [Vx, Vy]
+accelaration = np.array([0.1, 0])# [Ax, Ay]
+
+
+def showHeight():
+    height = font.render("Height = " + str(round(circlePosition[0],3)) + "; Velocity =" + str(round(circlePosition[0],3)), True, (0,0,0))
+    screen.blit(height,(10,10))
+
+def circle(x,y):
+    screen.blit(circleImage, (x,y))
+
+running = True
+drop = False
+bounce = False
+action = False
+# Game loop
+while running:
+    screen.fill((255,255,255)) # Fills the back ground of the screen with color
+    # QUIT pygame application and windows
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            pygame.quit() 
+            pygame.display.quit(); 
+            exit()  ## not necessary as it restarts the console
+        
+        if not(action):
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    action = True
+                    drop = True
+
+    
+    if drop:
+        circlePosition += circleVelocity 
+        circleVelocity = math.sqrt((circleYChange)**2 + 2*1e-7*circleY)
+        
+    if bounce:
+        if (circleYChange)**2 >= 2*1e-7*(540-circleY):
+            circleYChange = math.sqrt((circleYChange)**2 - 2*1e-7*(540-circleY))
+            circleY -= 0.8*circleYChange
+    
+        
+#    if circleY <=0:
+#        circleY = 0
+#        drop = True
+#        bounce = False
+##        circleYChange = 0.3
+        
+    if circleYChange <=0.01 and bounce :
+        #circleY = 0
+        drop = True
+        bounce = False
+#        circleYChange = 0.3
+        
+    if circleY >= 540 and drop:
+        drop = False
+        bounce = True
+#        circleYChange = -0.3 
+
+    circle(circleX, circleY)
+    showHeight(10,10)
+    pygame.display.update()
