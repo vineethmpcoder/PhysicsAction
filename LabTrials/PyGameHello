@@ -1,0 +1,99 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 20 22:52:32 2020
+Bouncing ball
+@author: vmpsk
+"""
+
+import pygame
+import random
+
+pygame.init()
+
+screen = pygame.display.set_mode((600,600))
+#Title and icon
+pygame.display.set_caption("Hello world")
+icon = pygame.image.load('RedCircle.png')
+pygame.display.set_icon(icon)
+
+cirlceImage = pygame.image.load('RedCircle.png')
+circleX = 200
+circleY = 200
+cirlceXChange = 0
+cirlceYChange = 0
+
+squareImage = pygame.image.load('blueSquare.png')
+squareX = random.randint(0,800)
+squareY = random.randint(0,800)  
+squareXChange = 0.3
+squareYChange = 0.3
+
+def circle(x,y):
+    screen.blit(cirlceImage, (x,y))
+
+def square(x,y):
+    screen.blit(squareImage, (x,y))
+
+
+running = True
+# Game loop
+while running:
+    screen.fill((255,255,255))
+    
+    # QUIT pygame application and windo
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit() #pygame.display.quit(); #exit()  ## not necessary as it restarts the console
+            running = False
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                cirlceXChange = -0.3
+            if event.key == pygame.K_RIGHT:
+                cirlceXChange = 0.3 
+            if event.key == pygame.K_UP:
+                cirlceYChange = -0.3
+            if event.key == pygame.K_DOWN:
+                cirlceYChange = 0.3         
+
+#        if event.type == pygame.KEYUP:
+#            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+#                cirlceXChange = 0
+#                cirlceYChange = 0
+    
+    # move circle object
+    circleX += cirlceXChange
+    circleY += cirlceYChange
+    
+    if circleX <=0:
+        circleX = 0
+        cirlceXChange = 0.3 
+        
+    if circleX >= 570:
+        circleX = 570
+        cirlceXChange = -0.3
+        
+    if circleY <=0:
+        circleY = 0
+        cirlceYChange = 0.3
+        
+    if circleY >= 570:
+        circleY = 570
+        cirlceYChange = -0.3 
+
+    
+    #move sqaure object
+    squareX += squareXChange
+    if squareX <=0:
+        squareXChange = +0.3
+        squareYChange = +0.3
+        
+    if squareX >= 570:
+        squareXChange = -0.3
+        squareYChange = +0.3
+    
+
+    #square(squareX, squareY)
+    circle(circleX, circleY)
+    
+    pygame.display.update()
