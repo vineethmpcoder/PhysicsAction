@@ -22,13 +22,13 @@ font = pygame.font.Font('freesansbold.ttf', 20)
 
 # Import image of the body in the game
 circleImage = pygame.image.load('RedCircle.png')
-circlePosition = np.array([80.0, 15.0]) # [x, y]
-circleVelocity = np.array([0.05, 0.0]) # [Vx, Vy]
-accelaration = np.array([0.0, .001])# [Ax, Ay]
-
+r = np.array([80.0, 15.0]) # [x, y]
+v = np.array([0.1, 0.0]) # [Vx, Vy]
+a = np.array([0.0, 0.01])# [Ax, Ay]
+dt = 10
 
 def showHeight():
-    height = font.render("h = " + str(round(circlePosition[1],2)) + "; v =" + str(round(circleVelocity[1],2)), True, (0,0,0))
+    height = font.render("h = " + str(round(r[1],2)) + "; v =" + str(round(v[1],2)), True, (0,0,0))
     screen.blit(height,(300,10))
 
 def circleShow(x,y):
@@ -58,33 +58,33 @@ while running:
                     drop = True
 
     if drop:
-        circleVelocity[1] = circleVelocity[1] + accelaration[1]
-        circlePosition[1] = circlePosition[1] + circleVelocity[1]
-        circlePosition[0] = circlePosition[0] + circleVelocity[0]
+#        v[0] = math.sqrt((v[0])**2 + 2*a[0]*r[0])
+#        v[1] = math.sqrt((v[1])**2 + 2*a[1]*r[1])
+        v[1] = v[1] + a[1]*dt
+        r[1] = r[1] + v[1]*dt
+        r[0] = r[0] + v[0]*dt
         
 
     if bounce:
-        circleVelocity[1] = circleVelocity[1] - accelaration[1]
-        circlePosition[1] = circlePosition[1] - circleVelocity[1]
-        circlePosition[0] = circlePosition[0] + circleVelocity[0]
-        
+        v[1] = v[1] - a[1]*dt
+        r[1] = r[1] - v[1]*dt
+        r[0] = r[0] + v[0]*dt
 
 
-    if circlePosition[1] >= 520 and drop == True:
+    if r[1] >= 520 and drop == True:
         drop = False
         bounce = True
-        circleVelocity = 0.9*circleVelocity
-        circlePosition[1] = 520
+        v[1] = 0.8*v[1]
+        v[0] = 0.98*v[0]
+        r[1] = 520
 
-    if circleVelocity[1]<=0.001 and action == True:
+    if v[1]<=0.001 and action == True:
         drop = True
         bounce = False
 
-    if circleVelocity[1] <= 0.001 and (circlePosition[1] >= 520 and drop == True):
-        drop = False
-        bounce = False
-    else:
-        circleShow(circlePosition[0], circlePosition[1]) #(x,y)
-        showHeight()
-        pygame.display.update()
-        print(circleVelocity, circlePosition)
+    circleShow(r[0], r[1]) #(x,y)
+    showHeight()
+    pygame.display.update()
+    print(v, r)
+    
+    pygame.time.delay(dt)
