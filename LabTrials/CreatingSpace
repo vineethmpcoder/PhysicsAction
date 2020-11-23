@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 20 22:52:32 2020
-Bouncing ball
+Created on Sun Nov 22 20:32:01 2020
+
 @author: vmpsk
 """
 
 import pygame 
 import numpy as np
-import random
 import math  
+import sys
 
 pygame.init()
 
@@ -16,29 +16,29 @@ screen = pygame.display.set_mode((600,600))
 
 #Title and icon
 pygame.display.set_caption("Hello world")
-icon = pygame.image.load('RedCircle.png')
-pygame.display.set_icon(icon)
-
+#icon = pygame.image.load('RedCircle.png')
+#pygame.display.set_icon(icon)
 font = pygame.font.Font('freesansbold.ttf', 20)
 
 # Import image of the body in the game
 circleImage = pygame.image.load('RedCircle.png')
-circlePosition = np.array([100, 15]) # [x, y]
-circleVelocity = np.array([0, 0]) # [Vx, Vy]
-accelaration = np.array([0.1, 0])# [Ax, Ay]
+circlePosition = np.array([80.0, 15.0]) # [x, y]
+circleVelocity = np.array([0.05, 0.0]) # [Vx, Vy]
+accelaration = np.array([0.0, .001])# [Ax, Ay]
 
 
 def showHeight():
-    height = font.render("Height = " + str(round(circlePosition[0],3)) + "; Velocity =" + str(round(circlePosition[0],3)), True, (0,0,0))
-    screen.blit(height,(10,10))
+    height = font.render("h = " + str(round(circlePosition[1],2)) + "; v =" + str(round(circleVelocity[1],2)), True, (0,0,0))
+    screen.blit(height,(300,10))
 
-def circle(x,y):
+def circleShow(x,y):
     screen.blit(circleImage, (x,y))
 
 running = True
 drop = False
 bounce = False
 action = False
+
 # Game loop
 while running:
     screen.fill((255,255,255)) # Fills the back ground of the screen with color
@@ -46,8 +46,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            pygame.quit() 
-            pygame.display.quit(); 
+            pygame.display.quit()
+            pygame.quit()
+#            sys.exit()
             exit()  ## not necessary as it restarts the console
         
         if not(action):
@@ -56,34 +57,34 @@ while running:
                     action = True
                     drop = True
 
-    
     if drop:
-        circlePosition += circleVelocity 
-        circleVelocity = math.sqrt((circleYChange)**2 + 2*1e-7*circleY)
+        circleVelocity[1] = circleVelocity[1] + accelaration[1]
+        circlePosition[1] = circlePosition[1] + circleVelocity[1]
+        circlePosition[0] = circlePosition[0] + circleVelocity[0]
         
+
     if bounce:
-        if (circleYChange)**2 >= 2*1e-7*(540-circleY):
-            circleYChange = math.sqrt((circleYChange)**2 - 2*1e-7*(540-circleY))
-            circleY -= 0.8*circleYChange
-    
+        circleVelocity[1] = circleVelocity[1] - accelaration[1]
+        circlePosition[1] = circlePosition[1] - circleVelocity[1]
+        circlePosition[0] = circlePosition[0] + circleVelocity[0]
         
-#    if circleY <=0:
-#        circleY = 0
-#        drop = True
-#        bounce = False
-##        circleYChange = 0.3
-        
-    if circleYChange <=0.01 and bounce :
-        #circleY = 0
-        drop = True
-        bounce = False
-#        circleYChange = 0.3
-        
-    if circleY >= 540 and drop:
+
+
+    if circlePosition[1] >= 520 and drop == True:
         drop = False
         bounce = True
-#        circleYChange = -0.3 
+        circleVelocity = 0.9*circleVelocity
+        circlePosition[1] = 520
 
-    circle(circleX, circleY)
-    showHeight(10,10)
-    pygame.display.update()
+    if circleVelocity[1]<=0.001 and action == True:
+        drop = True
+        bounce = False
+
+    if circleVelocity[1] <= 0.001 and (circlePosition[1] >= 520 and drop == True):
+        drop = False
+        bounce = False
+    else:
+        circleShow(circlePosition[0], circlePosition[1]) #(x,y)
+        showHeight()
+        pygame.display.update()
+        print(circleVelocity, circlePosition)
