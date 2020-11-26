@@ -35,30 +35,33 @@ def showHeight():
     height = font.render("h = " + str(round(r[1],2)) + "; v =" + str(round(v[1],2)), True, (0,0,0))
     screen.blit(height,(300,10))
 
-def circleShow(x,y):
-    screen.blit(circleImage, (x,y))
+def circleShow(r,shiftRegister):
+    screen.blit(blank, (shiftRegister[0],shiftRegister[1]))
+    screen.blit(circleImage, (r[0],r[1]))
 #    screen.blit(dot, (x,y))
 
-def showDot(x,y):
-    screen.blit(blank, (x,y))
-    screen.blit(dot, (x,y))
+def showDot(r):
+#    screen.blit(blank, (r[0],r[1]))
+    screen.blit(dot, (r[0],r[1]))
+
+running = True
+action = False
+itr = 0
+shiftRegister = np.array([0,0])
+#shiftRegister = r
 
 def move():
+    shiftRegister[0] = r[0]
+    shiftRegister[1] = r[1]
     v[1] = v[1] + a[1]*dt
     r[1] = r[1] + v[1]*dt
     v[0] = v[0] + a[0]*dt
     r[0] = r[0] + v[0]*dt
 
-running = True
-action = False
-itr = 0
-shiftRegister = collections.deque([],2)
-
 # Game loop
 while running:
-    itr += 1
+    
     screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//6))
-#    shiftRegister.popleft(str(itr))
 #    screen.fill((255,255,255)) # Fills the back ground of the screen with color
     # QUIT pygame application and windows
     for event in pygame.event.get():
@@ -74,7 +77,7 @@ while running:
                 if event.key == pygame.K_DOWN:
                     action = True
                     drop = True
-                    print(shiftRegister)
+
     
     if action == True:
         move()
@@ -83,11 +86,12 @@ while running:
         v[1] = -0.8*v[1]
         v[0] = 0.8*v[0]
         r[1] = 520
-        print(shiftRegister)
 
-    circleShow(r[0], r[1]) #(x,y)
+    circleShow(r, shiftRegister) #(x,y)
+#    showDot(r)
     showHeight()
     pygame.display.update()
 #    print(v, r)
     pygame.time.delay(dt)
+    print(shiftRegister-r)
     
