@@ -9,10 +9,12 @@ import pygame
 import numpy as np
 import math  
 import sys
+import collections
 
 pygame.init()
 
 screen = pygame.display.set_mode((600,600))
+screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()))
 
 #Title and icon
 pygame.display.set_caption("Hello world")
@@ -26,6 +28,8 @@ r = np.array([80.0, 15.0]) # [x, y]
 v = np.array([0.1, 0.0]) # [Vx, Vy]
 a = np.array([0.0, 0.01])# [Ax, Ay]
 dt = 10
+dot = pygame.image.load('dot.png')
+blank = pygame.image.load('blank.png')
 
 def showHeight():
     height = font.render("h = " + str(round(r[1],2)) + "; v =" + str(round(v[1],2)), True, (0,0,0))
@@ -33,15 +37,29 @@ def showHeight():
 
 def circleShow(x,y):
     screen.blit(circleImage, (x,y))
+#    screen.blit(dot, (x,y))
+
+def showDot(x,y):
+    screen.blit(blank, (x,y))
+    screen.blit(dot, (x,y))
+
+def move():
+    v[1] = v[1] + a[1]*dt
+    r[1] = r[1] + v[1]*dt
+    v[0] = v[0] + a[0]*dt
+    r[0] = r[0] + v[0]*dt
 
 running = True
-drop = False
-bounce = False
 action = False
+itr = 0
+shiftRegister = collections.deque([],2)
 
 # Game loop
 while running:
-    screen.fill((255,255,255)) # Fills the back ground of the screen with color
+    itr += 1
+    screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//6))
+#    shiftRegister.popleft(str(itr))
+#    screen.fill((255,255,255)) # Fills the back ground of the screen with color
     # QUIT pygame application and windows
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -50,41 +68,26 @@ while running:
             pygame.quit()
 #            sys.exit()
             exit()  ## not necessary as it restarts the console
-        
+
         if not(action):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
                     action = True
                     drop = True
+                    print(shiftRegister)
+    
+    if action == True:
+        move()
 
-    if drop:
-#        v[0] = math.sqrt((v[0])**2 + 2*a[0]*r[0])
-#        v[1] = math.sqrt((v[1])**2 + 2*a[1]*r[1])
-        v[1] = v[1] + a[1]*dt
-        r[1] = r[1] + v[1]*dt
-        r[0] = r[0] + v[0]*dt
-        
-
-    if bounce:
-        v[1] = v[1] - a[1]*dt
-        r[1] = r[1] - v[1]*dt
-        r[0] = r[0] + v[0]*dt
-
-
-    if r[1] >= 520 and drop == True:
-        drop = False
-        bounce = True
-        v[1] = 0.8*v[1]
-        v[0] = 0.98*v[0]
+    if r[1] >= 520:
+        v[1] = -0.8*v[1]
+        v[0] = 0.8*v[0]
         r[1] = 520
-
-    if v[1]<=0.001 and action == True:
-        drop = True
-        bounce = False
+        print(shiftRegister)
 
     circleShow(r[0], r[1]) #(x,y)
     showHeight()
     pygame.display.update()
-    print(v, r)
-    
+#    print(v, r)
     pygame.time.delay(dt)
+    
