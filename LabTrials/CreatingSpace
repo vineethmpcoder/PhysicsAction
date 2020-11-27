@@ -14,7 +14,7 @@ import collections
 pygame.init()
 
 screen = pygame.display.set_mode((600,600))
-screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()))
+screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//1))
 
 #Title and icon
 pygame.display.set_caption("Hello world")
@@ -22,42 +22,56 @@ pygame.display.set_caption("Hello world")
 #pygame.display.set_icon(icon)
 font = pygame.font.Font('freesansbold.ttf', 20)
 
-# Import image of the body in the game
-circleImage = pygame.image.load('RedCircle.png')
-r = np.array([80.0, 15.0]) # [x, y]
-v = np.array([0.1, 0.0]) # [Vx, Vy]
-a = np.array([0.0, 0.01])# [Ax, Ay]
-dt = 10
+# Import image of the Body in the game
+circleImage = pygame.image.load('circle.png')
 dot = pygame.image.load('dot.png')
 blank = pygame.image.load('blank.png')
+dt = 8
 
-def showHeight():
-    height = font.render("h = " + str(round(r[1],2)) + "; v =" + str(round(v[1],2)), True, (0,0,0))
-    screen.blit(height,(300,10))
+class Body():
+    def __init__(self, r, v, a):
+        self.r = r # [x, y]
+        self.v = v # [Vx, Vy]
+        self.a = a# [Ax, Ay]
+        self.shiftRegister = self.r
 
-def circleShow(r,shiftRegister):
-    screen.blit(blank, (shiftRegister[0],shiftRegister[1]))
-    screen.blit(circleImage, (r[0],r[1]))
-#    screen.blit(dot, (x,y))
+    def draw(self, screen):
+        screen.blit(blank, (shiftRegister[0],shiftRegister[1]))
+        screen.blit(circleImage, (self.r[0],self.r[1]))
+    #    screen.blit(dot, (x,y))
+    def move(self):
+        shiftRegister[0] = self.r[0]
+        shiftRegister[1] = self.r[1]
+        self.v[1] = self.v[1] + self.a[1]*dt
+        self.r[1] = self.r[1] + self.v[1]*dt
+        self.v[0] = self.v[0] + self.a[0]*dt
+        self.r[0] = self.r[0] + self.v[0]*dt
 
-def showDot(r):
-#    screen.blit(blank, (r[0],r[1]))
-    screen.blit(dot, (r[0],r[1]))
+class Data():
+    def __init__(self,r,v):
+        self.r = r
+        self.v = v
+        self.height = font.render("h = " + str(round(self.r[1],2)) + "; v =" + str(round(self.v[1],2)), True, (0,0,0))
+    def showData(self,screen):
+        screen.blit(self.height,(300,10))
+    def updateData(self, r, v):
+        self.r = r
+        self.v = v
+        self.height = font.render("h = " + str(round(self.r[1],2)) + "; v =" + str(round(self.v[1],2)), True, (0,0,0))
+
+def reDrawScreen():
+     circle.draw(screen)
+     data.updateData(circle.r,circle.v)
+     data.showData(screen)    
+     pygame.display.update()  
 
 running = True
 action = False
-itr = 0
 shiftRegister = np.array([0,0])
 #shiftRegister = r
 
-def move():
-    shiftRegister[0] = r[0]
-    shiftRegister[1] = r[1]
-    v[1] = v[1] + a[1]*dt
-    r[1] = r[1] + v[1]*dt
-    v[0] = v[0] + a[0]*dt
-    r[0] = r[0] + v[0]*dt
-
+circle = Body(np.array([80.0, 15.0]), np.array([0.1, 0.0]), np.array([0.0, 0.01]))
+data = Data(np.array([80.0, 15.0]), np.array([0.1, 0.0]))
 # Game loop
 while running:
     
@@ -77,21 +91,27 @@ while running:
                 if event.key == pygame.K_DOWN:
                     action = True
                     drop = True
-
     
     if action == True:
-        move()
+        circle.move()
 
-    if r[1] >= 520:
-        v[1] = -0.8*v[1]
-        v[0] = 0.8*v[0]
-        r[1] = 520
-
-    circleShow(r, shiftRegister) #(x,y)
-#    showDot(r)
-    showHeight()
-    pygame.display.update()
-#    print(v, r)
-    pygame.time.delay(dt)
-    print(shiftRegister-r)
+    if circle.r[1] >= 520:
+        circle.v[1] = -0.999*circle.v[1]
+        circle.v[0] = 1*circle.v[0]
+        circle.r[1] = 520
     
+    if circle.r[0] >= 520:
+        circle.v[0] = -1*circle.v[0]
+        circle.r[0] = 520
+    
+    if circle.r[0] <= 0:
+        circle.v[0] = -1*circle.v[0]
+        circle.r[0] = 0
+        
+    reDrawScreen()
+    pygame.time.delay(dt)
+    
+
+#def showDot(a):
+##    screen.blit(blank, (r[0],r[1]))
+#    screen.blit(dot, (a[0],a[1]))
