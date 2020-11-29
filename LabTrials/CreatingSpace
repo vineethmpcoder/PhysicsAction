@@ -12,10 +12,8 @@ import sys
 import collections
 
 pygame.init()
-
 screen = pygame.display.set_mode((600,600))
 screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//1))
-
 #Title and icon
 pygame.display.set_caption("Hello world")
 #icon = pygame.image.load('RedCircle.png')
@@ -23,59 +21,59 @@ pygame.display.set_caption("Hello world")
 font = pygame.font.Font('freesansbold.ttf', 20)
 
 # Import image of the Body in the game
-circleImage = pygame.image.load('circle.png')
+circleGrey = pygame.image.load('GreyCircle.png')
+circleRed = pygame.image.load('RedCircle.png')
 dot = pygame.image.load('dot.png')
 blank = pygame.image.load('blank.png')
 dt = 8
 
 class Body():
-    def __init__(self, r, v, a):
+    def __init__(self, r, v, a, circle):
         self.r = r # [x, y]
         self.v = v # [Vx, Vy]
         self.a = a# [Ax, Ay]
-        self.shiftRegister = self.r
+        self.shiftRegister = np.array([0.0, 0.0])
+        self.circle = circle
 
-    def draw(self, screen):
-        screen.blit(blank, (shiftRegister[0],shiftRegister[1]))
-        screen.blit(circleImage, (self.r[0],self.r[1]))
+    def draw(self):
+        screen.blit(blank, (self.shiftRegister[0],self.shiftRegister[1]))
+        screen.blit(self.circle, (self.r[0],self.r[1]))
     #    screen.blit(dot, (x,y))
     def move(self):
-        shiftRegister[0] = self.r[0]
-        shiftRegister[1] = self.r[1]
+        self.shiftRegister[0] = self.r[0]
+        self.shiftRegister[1] = self.r[1]
         self.v[1] = self.v[1] + self.a[1]*dt
         self.r[1] = self.r[1] + self.v[1]*dt
         self.v[0] = self.v[0] + self.a[0]*dt
         self.r[0] = self.r[0] + self.v[0]*dt
 
-class Data():
-    def __init__(self,r,v):
-        self.r = r
-        self.v = v
-        self.height = font.render("h = " + str(round(self.r[1],2)) + "; v =" + str(round(self.v[1],2)), True, (0,0,0))
-    def showData(self,screen):
-        screen.blit(self.height,(300,10))
-    def updateData(self, r, v):
-        self.r = r
-        self.v = v
-        self.height = font.render("h = " + str(round(self.r[1],2)) + "; v =" + str(round(self.v[1],2)), True, (0,0,0))
+        if self.r[1] >= 520:
+            self.v[1] = -0.999*self.v[1]
+            self.v[0] = 1*self.v[0]
+            self.r[1] = 520
 
-def reDrawScreen():
-     circle.draw(screen)
-     data.updateData(circle.r,circle.v)
-     data.showData(screen)    
-     pygame.display.update()  
+        if self.r[0] >= 520:
+            self.v[0] = -1*self.v[0]
+            self.r[0] = 520
+
+        if self.r[0] <= 0:
+            self.v[0] = -1*self.v[0]
+            self.r[0] = 0
+
+    def showData(self, posX, posY):
+        screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//15))
+        self.height = font.render("h = " + str(round(self.r[1],2)) + "; v =" + str(round(self.v[1],2)), True, (0,0,0))
+        screen.blit(self.height,(posX,posY))
 
 running = True
 action = False
-shiftRegister = np.array([0,0])
-#shiftRegister = r
+circle0 = Body(np.array([80.0, 50.0]), np.array([0.1, 0.0]), np.array([0.0, 0.01]), circleRed)
+circle1 = Body(np.array([400.0, 200.0]), np.array([0.1, 0.0]), np.array([0.0, 0.01]), circleGrey)
+circle0.draw()
+circle1.draw()
 
-circle = Body(np.array([80.0, 15.0]), np.array([0.1, 0.0]), np.array([0.0, 0.01]))
-data = Data(np.array([80.0, 15.0]), np.array([0.1, 0.0]))
 # Game loop
 while running:
-    
-    screen.fill((255,255,255), (0, 0, screen.get_width()// 1, screen.get_height()//6))
 #    screen.fill((255,255,255)) # Fills the back ground of the screen with color
     # QUIT pygame application and windows
     for event in pygame.event.get():
@@ -93,25 +91,14 @@ while running:
                     drop = True
     
     if action == True:
-        circle.move()
-
-    if circle.r[1] >= 520:
-        circle.v[1] = -0.999*circle.v[1]
-        circle.v[0] = 1*circle.v[0]
-        circle.r[1] = 520
-    
-    if circle.r[0] >= 520:
-        circle.v[0] = -1*circle.v[0]
-        circle.r[0] = 520
-    
-    if circle.r[0] <= 0:
-        circle.v[0] = -1*circle.v[0]
-        circle.r[0] = 0
+        circle0.move()
+        circle1.move()
+        circle0.draw()
+        circle1.draw()
         
-    reDrawScreen()
-    pygame.time.delay(dt)
-    
+    if (np.linalg.norm(circle1.r -circle0.r)<= 30 ): # Elastic collision
+        circle0.v, circle1.v = circle1.v, circle0.v 
 
-#def showDot(a):
-##    screen.blit(blank, (r[0],r[1]))
-#    screen.blit(dot, (a[0],a[1]))
+    pygame.time.delay(dt)
+    pygame.display.update()
+
